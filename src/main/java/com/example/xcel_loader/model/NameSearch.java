@@ -1,4 +1,4 @@
-package ug.go.ursb.namesearch.models;
+package com.example.xcel_loader.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -14,8 +14,7 @@ import javax.persistence.PrePersist;
 import java.util.Date;
 import java.util.UUID;
 
-import static ug.go.ursb.namesearch.helpers.Constants.DATE_FORMAT;
-import static ug.go.ursb.namesearch.helpers.Constants.DATE_TIME_FORMAT;
+import static com.example.xcel_loader.model.Constants.DATE_FORMAT;
 
 @Setter
 @Getter
@@ -36,7 +35,7 @@ public class NameSearch {
     private Date createdAt;
 
     @Column(name = "updated_at")
-    @JsonFormat(pattern = DATE_TIME_FORMAT)
+    @JsonFormat(pattern = DATE_FORMAT)
     @UpdateTimestamp
     private Date updatedAt;
 
