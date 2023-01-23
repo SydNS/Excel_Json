@@ -23,7 +23,7 @@ public class SqlStore implements Store {
 
     @Override
     public void clear() {
-
+//        nameSearchRepository.deleteAll();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class SqlStore implements Store {
 
 
             return checkName.get().getId();
-        }else {
+        } else {
             var results = nameSearchRepository.saveAndFlush(name);
 
 //            saveInElasticSearch(results);
@@ -100,8 +100,8 @@ public class SqlStore implements Store {
     }
 
     @Override
-    public boolean existsByName(String name) {
-        return nameSearchRepository.existsByName(name);
+    public boolean existsByNo(String name) {
+        return nameSearchRepository.existsByNo(name);
     }
 
     @Override
@@ -115,17 +115,17 @@ public class SqlStore implements Store {
     public NameSearch updateStatus(String no, String toStatus) {
         var nameByNo = nameSearchRepository.findByNoOrderByCreatedAtDesc(no);
 
-        if(nameByNo.isEmpty()){
-            throw new NameSearchException("Invalid number: "+no);
+        if (nameByNo.isEmpty()) {
+            throw new NameSearchException("Invalid number: " + no);
         }
 
         var oldStatus = nameByNo.get().getStatus();
 
-        if(oldStatus.equals(toStatus)){
-            throw new NameSearchException("This entity already has status: "+toStatus);
+        if (oldStatus.equals(toStatus)) {
+            throw new NameSearchException("This entity already has status: " + toStatus);
         }
 
-        nameByNo.map(newStatus->{
+        nameByNo.map(newStatus -> {
             newStatus.setStatus(toStatus);
             return nameSearchRepository.saveAndFlush(newStatus);
         });

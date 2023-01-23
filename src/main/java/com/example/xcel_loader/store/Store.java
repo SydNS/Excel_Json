@@ -20,7 +20,7 @@ public interface Store {
 
     NameSearch updateToRegistered(String reservationNo, String registrationNo);
 
-    boolean existsByName(String name);
+    boolean existsByNo(String name);
 
 
     void removeName(UUID searchId);
