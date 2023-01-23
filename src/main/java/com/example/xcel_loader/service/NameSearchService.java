@@ -9,13 +9,21 @@ import com.example.xcel_loader.store.Store;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -64,20 +72,20 @@ public class NameSearchService {
                 var customApiResponse = new CustomApiResponse();
                 customApiResponse.setMessage("These names were not added because they already exist");
                 customApiResponse.setData(duplicateName);
-                customApiResponse.setStatus(HttpStatus.ACCEPTED.value());
+                customApiResponse.setStatus(HttpStatus.CONFLICT.value());
                 return customApiResponse;
             } else {
                 var customApiResponse = new CustomApiResponse();
                 customApiResponse.setMessage("Name added to search");
                 customApiResponse.setData(brsNames);
-                customApiResponse.setStatus(HttpStatus.ACCEPTED.value());
+                customApiResponse.setStatus(HttpStatus.OK.value());
                 return customApiResponse;
             }
         } else {
             var customApiResponse = new CustomApiResponse();
             customApiResponse.setMessage("File " + req.getFile().getContentType() + "not allowed");
             customApiResponse.setData(null);
-            customApiResponse.setStatus(HttpStatus.ACCEPTED.value());
+            customApiResponse.setStatus(HttpStatus.OK.value());
             return customApiResponse;
         }
 
@@ -96,10 +104,10 @@ public class NameSearchService {
             Row currentRow = rows.next();
 
             // skip header
-//            if (rowNumber == 0) {
-//                rowNumber++;
-//                continue;
-//            }
+            if (rowNumber == 0) {
+                rowNumber++;
+                continue;
+            }
 
             Iterator<Cell> cellsInRow = currentRow.iterator();
 
@@ -119,13 +127,21 @@ public class NameSearchService {
                         break;
                     case 2:
                         if (!(value instanceof String)) {
-                        Date date = currentCell.getDateCellValue();
-                        name.setCreatedAt(date);
-                        break;
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+                            String dateString = currentCell.getDateCellValue().toString();
+                            Date date;
+                            try {
+                                date = dateFormat.parse("01/20/2023");
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
+//                            Date date = currentCell.getDateCellValue();
+                            name.setCreatedAt(date);
+                            break;
                         }
                     case 3:
                         if (!(value instanceof String)) {
-                            Date date_ = currentCell.getDateCellValue();
+                            Date date_ = new Date();
                             name.setUpdatedAt(date_);
                             break;
                         }
@@ -150,7 +166,7 @@ public class NameSearchService {
             }
             if (!nameSearchStore.existsByName(name.getName())) {
                 oldBrns.add(name);
-            }else {
+            } else {
                 dulpicateBrns.add(name);
             }
         }
@@ -160,6 +176,7 @@ public class NameSearchService {
     }
 
 
+    @Transactional
     public void createName(NameSearch nameSearch) {
         var checkName = nameSearchStore.findByNoOrId(nameSearch.getNo(), nameSearch.getId());
 
@@ -203,4 +220,29 @@ public class NameSearchService {
 
         System.out.println("New name line: " + nameSearch.getName() + " " + nameSearch.getNo() + " " + nameSearch.getStatus());
     }
+
+    public void exportExcel(String filePath, List<List<Object>> data) {
+        try {
+
+            XSSFWorkbook workbook = new XSSFWorkbook();
+
+            XSSFSheet sheet = workbook.createSheet("Data");
+
+            for (int i = 0; i < data.size(); i++) {
+                XSSFRow row = sheet.createRow(i);
+                List<Object> rowData = data.get(i);
+                for (int j = 0; j < rowData.size(); j++) {
+                    XSSFCell cell = row.createCell(j);
+                    cell.setCellValue(rowData.get(j).toString());
+                }
+            }
+
+            FileOutputStream fos = new FileOutputStream(filePath);
+            workbook.write(fos);
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
