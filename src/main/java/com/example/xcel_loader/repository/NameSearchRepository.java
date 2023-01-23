@@ -15,4 +15,8 @@ public interface NameSearchRepository extends JpaRepository<NameSearch, UUID>, J
     Optional<NameSearch> findByNoOrIdOrderByCreatedAtDesc(String no, UUID id);
 
     List<NameSearch> findByName(String exactMatch);
+
+    boolean existsByNo(String no);
+
+
 }
