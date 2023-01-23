@@ -22,8 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -119,26 +117,25 @@ public class NameSearchService {
 
                 DataFormatter formatter = new DataFormatter();
                 String value = formatter.formatCellValue(currentCell);
-                System.out.println(value);
+                System.out.println("Dates here ======>  : "+value);
 
                 switch (cellIdx) {
                     case 1:
                         name.setName(value);
                         break;
                     case 2:
-                        if (!(value instanceof String)) {
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-                            String dateString = currentCell.getDateCellValue().toString();
-                            Date date;
-                            try {
-                                date = dateFormat.parse("01/20/2023");
-                            } catch (ParseException e) {
-                                throw new RuntimeException(e);
-                            }
-//                            Date date = currentCell.getDateCellValue();
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy");
+                        String dateString = currentCell.getDateCellValue().toString();
+                        Date date;
+                        try {
+                            date = dateFormat.parse(dateString);
                             name.setCreatedAt(date);
-                            break;
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
                         }
+//                            Date date = currentCell.getDateCellValue();
+//                            name.setCreatedAt(date);
+                        break;
                     case 3:
                         if (!(value instanceof String)) {
                             Date date_ = new Date();
@@ -164,7 +161,7 @@ public class NameSearchService {
 
                 cellIdx++;
             }
-            if (!nameSearchStore.existsByName(name.getName())) {
+            if (!nameSearchStore.existsByNo(name.getNo())) {
                 oldBrns.add(name);
             } else {
                 dulpicateBrns.add(name);
