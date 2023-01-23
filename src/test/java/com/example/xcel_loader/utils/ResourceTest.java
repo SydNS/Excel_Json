@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
@@ -19,15 +20,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles(value = { "integration-test" })
+@ActiveProfiles(value = {"integration-test"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.main.allow-bean-definition-overriding=true")
 public class ResourceTest {
 
     public ObjectMapper mapper;
 
     public User testUser;
-
-    private static ApplicationContext context;
+    @Autowired
+    private ApplicationContext context;
 
     @LocalServerPort
     private int port;
@@ -52,7 +53,7 @@ public class ResourceTest {
     }
 
     private void clearStores() {
-//        context.getBean(Store.class).clear();
+        context.getBean(Store.class).clear();
 
 
     }
